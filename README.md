@@ -104,6 +104,7 @@ You can configure Cloudflare to proxy your XSSHunter server and protect your VPS
 ![image](https://github.com/user-attachments/assets/03260520-6c68-4e2c-9355-55b2ef464f4f)
 2. create a modify response header rule in cloudflare like below
 ![image](https://github.com/user-attachments/assets/e52c7a6a-3fe4-4b6d-82bc-5f9137dcbbbe)
+![image](https://github.com/user-attachments/assets/8835e4c0-652f-4611-924c-c9c1ad110a3f)
 
 
 
