@@ -32,8 +32,8 @@ apt update
 apt install -y docker.io docker-compose nginx certbot python3-certbot-nginx
 
 # Clone the repository
-git clone https://github.com/mandatoryprogrammer/xsshunter-express
-cd xsshunter-express
+git clone https://github.com/BitThr3at/XSSHunter2.0  
+cd XSSHunter2.0
 ```
 
 ### 2️⃣ Configuration

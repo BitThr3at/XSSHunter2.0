@@ -7,13 +7,13 @@
                 <sidebar-link to="/xsspayloads" name="XSS Payloads" icon="fas fa-file-code" />
                 <sidebar-link to="/settings" name="Settings" icon="fas fa-cogs" />
                 <li class="nav-item mt-5">
-                  <a target="_blank" href="https://twitter.com/IAmMandatory" class="nav-link">
+                  <a target="_blank" href="https://x.com/BitThr3at" class="nav-link">
                     <i class="fab fa-twitter"></i>
-                    <p>By @IAmMandatory</p>
+                    <p>By @BitThr3at</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a target="_blank" href="https://github.com/mandatoryprogrammer/xsshunter-express" class="nav-link">
+                  <a target="_blank" href="https://github.com/BitThr3at/XSSHunter2.0" class="nav-link">
                     <i class="fab fa-github"></i>
                     <p>Github Repo</p>
                   </a>
