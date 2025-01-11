@@ -31,7 +31,7 @@ var sessions_settings_object = {
     activeDuration: 1000 * 60 * 5, // Extend for five minutes if actively used
     cookie: {
         httpOnly: true,
-        secure: true
+        secure: false
     }
 }
 function session_wrapper_function(req, res, next) {
