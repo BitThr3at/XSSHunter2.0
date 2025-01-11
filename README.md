@@ -1,19 +1,18 @@
 # 🎯 XSS Hunter 2.0
 
-A lightweight version of XSS Hunter that you can deploy on your own VPS! Captures XSS payloads and all kinds of useful data when they fire.
+A Maintained updated version of original [xsshunter-express](https://github.com/mandatoryprogrammer/xsshunter-express) to keep it operational and addon new features.
 
 ## 🌟 Features
 
 - 📸 Full page screenshots of XSS payload fires
 - 🔍 DOM snapshot at time of payload fire  
-- 🌐 Victim's cookies
+- 🌐 Victim's cookies (non-httponly)
 - 📱 Victim's user agent
 - 📍 Victim's IP address
 - ↩️ Origin of execution
 - 🔗 URL of execution
-- 🎨 Clean and modern UI
-- 🔔 Discord notifications
-- 🔒 Secure by default
+- 🎨 Clean UI
+- 🔔 Discord notifications 🆕
 
 ## 🚀 Deployment Guide
 
@@ -52,6 +51,7 @@ environment:
 sudo apt install python3-certbot-nginx
 certbot --nginx -d yourdomain.com
 ```
+![image](https://github.com/user-attachments/assets/1cc5b76a-0ac5-4767-bcfc-33afd7cd1c97)
 
 2. After certbot finishes setting up nginx, add proxy configuration to the HTTPS server block in `/etc/nginx/sites-available/yourdomain.com`:
 ```nginx
@@ -73,6 +73,7 @@ server {
     }
 }
 ```
+![image](https://github.com/user-attachments/assets/0b6b0bcd-9de8-4b04-aa55-2a4d9b5accc8)
 
 3. Test and restart Nginx:
 ```bash
@@ -88,22 +89,22 @@ docker-compose up -d
 # Check logs
 docker-compose logs -f
 ```
+![image](https://github.com/user-attachments/assets/d6f0020d-c6cd-4b17-a9b1-9dafc845f236)
+
 
 ### 5️⃣ Post-Installation
 
 1. Access the admin panel at `https://yourdomain.com/admin/`
 2. The initial password will be displayed in the docker logs
-3. Configure your Discord webhook URL in the settings
-4. Generate your API keys and start collecting XSS payloads!
+   
+## 🛡️ Additonal Security
+You can configure Cloudflare to proxy your XSSHunter server and protect your VPS IP address. However, there are two key adjustments you need to make in Cloudflare to ensure everything works correctly:
+1. Set ssl configuration as `full`
+![image](https://github.com/user-attachments/assets/03260520-6c68-4e2c-9355-55b2ef464f4f)
+2. create a modify response header rule in cloudflare like below
+![image](https://github.com/user-attachments/assets/e52c7a6a-3fe4-4b6d-82bc-5f9137dcbbbe)
 
-## 🛡️ Security Recommendations
 
-- 🔒 Change the default password immediately
-- 🔐 Use strong passwords for database and admin access
-- 🚫 Restrict access to admin panel by IP if possible
-- 🔄 Regularly update the application and dependencies
-- 📝 Monitor logs for suspicious activities
-- 🔥 Use firewall rules to restrict access
 
 ## 🔧 Troubleshooting
 
@@ -128,7 +129,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🙏 Credits
 
 - Original XSS Hunter by [@mandatoryprogrammer](https://github.com/mandatoryprogrammer)
-- Express port maintained by the community
+- Express project maintained by the community
 
 ## 🤝 Contributing
 
