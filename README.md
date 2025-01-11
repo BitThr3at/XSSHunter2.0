@@ -49,6 +49,7 @@ environment:
 
 1. First, obtain SSL certificate using certbot:
 ```bash
+sudo apt install python3-certbot-nginx
 certbot --nginx -d yourdomain.com
 ```
 
