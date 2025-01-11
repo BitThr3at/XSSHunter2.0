@@ -27,7 +27,7 @@ services:
       - DATABASE_HOST=postgresdb
       - NODE_ENV=production
     ports:
-      - "80:8082"
+      - "8082:8082"
     volumes:
       # Directory where payload fire images are stored.
       - ./payload-fire-images:/app/payload-fire-images
