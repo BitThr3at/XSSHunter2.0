@@ -13,6 +13,7 @@ A Maintained updated version of original [xsshunter-express](https://github.com/
 - 🔗 URL of execution
 - 🎨 Clean UI
 - 🔔 Discord notifications 🆕
+<img src="https://github.com/user-attachments/assets/f4c3f2db-bcea-4316-9acf-490fdf0901b6" alt="discord" width="300">
 
 ## 🚀 Deployment Guide
 
