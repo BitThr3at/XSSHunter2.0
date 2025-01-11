@@ -329,10 +329,9 @@ async function get_app_server() {
         const pages_to_collect = (db_results[0] === null) ? [] : JSON.parse(db_results[0].value);
         const chainload_uri = (db_results[1] === null) ? '' : db_results[1].value;
 
-        const protocol = process.env.USE_SSL === 'true' ? 'https' : 'http';
         res.send(XSS_PAYLOAD.replace(
             /\[HOST_URL\]/g,
-            `${protocol}://${process.env.HOSTNAME}`
+			`https://${process.env.HOSTNAME}`
         ).replace(
             '[COLLECT_PAGE_LIST_REPLACE_ME]',
             JSON.stringify(pages_to_collect)
