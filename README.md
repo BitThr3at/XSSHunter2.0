@@ -1,4 +1,4 @@
-# 🎯 XSS Hunter Express
+# 🎯 XSS Hunter 2.0
 
 A lightweight version of XSS Hunter that you can deploy on your own VPS! Captures XSS payloads and all kinds of useful data when they fire.
 
