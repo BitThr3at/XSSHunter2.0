@@ -27,9 +27,8 @@ COPY docker-entrypoint.sh /app/
 RUN chmod +x /app/docker-entrypoint.sh
 COPY templates /app/templates
 
-# Expose both HTTP and HTTPS ports
+# Expose HTTP port
 EXPOSE 80
-EXPOSE 443
 
 # Start the server
 ENTRYPOINT ["/app/docker-entrypoint.sh"]

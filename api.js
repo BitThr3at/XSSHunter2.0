@@ -21,7 +21,8 @@ const validate = require('express-jsonschema').validate;
 const get_hashed_password = require('./utils.js').get_hashed_password;
 const get_secure_random_string = require('./utils.js').get_secure_random_string;
 
-const SCREENSHOTS_DIR = path.resolve(process.env.SCREENSHOTS_DIR);
+// Set default screenshots directory if not provided
+const SCREENSHOTS_DIR = path.resolve(process.env.SCREENSHOTS_DIR || './payload-fire-images');
 
 var sessions_middleware = false;
 var sessions_settings_object = {
@@ -30,7 +31,7 @@ var sessions_settings_object = {
     activeDuration: 1000 * 60 * 5, // Extend for five minutes if actively used
     cookie: {
         httpOnly: true,
-        secure: true
+        secure: false
     }
 }
 function session_wrapper_function(req, res, next) {
@@ -452,6 +453,12 @@ async function set_up_api_server(app) {
                     return JSON.parse(value);
                 }),
             },
+            {
+                key: 'DISCORD_NOTIFICATIONS_ENABLED',
+                return_key: 'discord_notifications_enabled',
+                default: 'true',
+                formatter: false,
+            },
     	];
 
     	let result = {};
@@ -491,7 +498,7 @@ async function set_up_api_server(app) {
                 type: 'string',
                 required: false,
             },
-            send_alert_emails: {
+            discord_notifications_enabled: {
                 type: 'boolean',
                 required: false,
             },
@@ -544,6 +551,13 @@ async function set_up_api_server(app) {
             await update_settings_value(
                 constants.SEND_ALERT_EMAILS_KEY,
                 req.body.send_alert_emails.toString()
+            );
+        }
+
+        if(req.body.discord_notifications_enabled !== undefined) {
+            await update_settings_value(
+                'DISCORD_NOTIFICATIONS_ENABLED',
+                req.body.discord_notifications_enabled.toString()
             );
         }
 

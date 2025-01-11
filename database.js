@@ -12,10 +12,44 @@ const sequelize = new Sequelize(
 	{
 		host: process.env.DATABASE_HOST,
 		dialect: 'postgres',
-		benchmark: true,
-		logging: true
+		logging: false,
+		retry: {
+			max: 10,
+			match: [
+				/SequelizeConnectionRefusedError/,
+				/SequelizeConnectionError/,
+				/SequelizeHostNotFoundError/,
+				/SequelizeHostNotReachableError/,
+				/SequelizeInvalidConnectionError/,
+				/SequelizeConnectionTimedOutError/
+			],
+			backoffBase: 1000,
+			backoffExponent: 1.5,
+		}
 	},
 );
+
+// Add error handler for unhandled rejections
+process.on('unhandledRejection', (error) => {
+	console.error('Unhandled promise rejection:', error);
+});
+
+async function waitForDatabase(maxAttempts = 10) {
+	for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+		try {
+			await sequelize.authenticate();
+			console.log('Database connection has been established successfully.');
+			return;
+		} catch (error) {
+			console.error(`Database connection attempt ${attempt}/${maxAttempts} failed:`, error.message);
+			if (attempt === maxAttempts) {
+				throw error;
+			}
+			// Wait before next attempt (exponential backoff)
+			await new Promise(resolve => setTimeout(resolve, Math.min(1000 * Math.pow(1.5, attempt), 10000)));
+		}
+	}
+}
 
 const Model = Sequelize.Model;
 
@@ -395,6 +429,7 @@ async function initialize_users() {
 		return
 	}
 
+
 	// Now we need to write these credentials to the
 	// filesystem in a file so the user can retrieve
 	// them.
@@ -429,24 +464,32 @@ async function initialize_correlation_api() {
 async function database_init() {
 	const force = false;
 
-	// Set up database schema
-	await Promise.all([
-		Settings.sync({ force: force }),
-		PayloadFireResults.sync({ force: force }),
-		CollectedPages.sync({ force: force }),
-		InjectionRequests.sync({ force: force }),
-	]);
+	try {
+		// Wait for database to be available
+		await waitForDatabase();
 
-	await Promise.all([
-		// Set up configs if they're not already set up.
-		initialize_configs(),
+		// Set up database schema
+		await Promise.all([
+			Settings.sync({ force: force }),
+			PayloadFireResults.sync({ force: force }),
+			CollectedPages.sync({ force: force }),
+			InjectionRequests.sync({ force: force }),
+		]);
 
-		// Set up admin panel user if not already set up.
-		initialize_users(),
+		await Promise.all([
+			// Set up configs if they're not already set up.
+			initialize_configs(),
 
-		// Set up the correlation API if not already set up
-		initialize_correlation_api(),
-	]);
+			// Set up admin panel user if not already set up.
+			initialize_users(),
+
+			// Set up the correlation API if not already set up
+			initialize_correlation_api(),
+		]);
+	} catch (error) {
+		console.error('Failed to initialize database:', error);
+		process.exit(1); // Exit if database init fails
+	}
 }
 
 async function update_settings_value(settings_key, new_value) {

@@ -124,12 +124,12 @@ async function set_chainload_uri(chainload_uri) {
     );
 }
 
-async function set_email_alerts(send_alerts_bool) {
+async function set_discord_notifications(enabled) {
     return api_request(
         'PUT',
         `/api/v1/settings`,
         {
-            "send_alert_emails": send_alerts_bool,
+            "discord_notifications_enabled": enabled,
         }
     );
 }
@@ -168,7 +168,7 @@ module.exports = {
     update_password,
     generate_new_correlation_api_key,
     set_chainload_uri,
-    set_email_alerts,
+    set_discord_notifications,
     revoke_all_sessions,
     update_pages_to_collect
 }

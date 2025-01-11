@@ -1,0 +1,6 @@
+A new XSS payload has been triggered!
+
+Origin: {{origin}}
+DOM Length: {{dom_size}} bytes
+Page Text Length: {{page_text_size}} bytes
+Screenshot Size: {{screenshot_size}} bytes 

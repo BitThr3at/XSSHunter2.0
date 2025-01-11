@@ -44,7 +44,7 @@ const XSS_PAYLOAD = fs.readFileSync(
 
 var multer = require('multer');
 var upload = multer({ dest: '/tmp/' })
-const SCREENSHOTS_DIR = path.resolve(process.env.SCREENSHOTS_DIR);
+const SCREENSHOTS_DIR = path.resolve(process.env.SCREENSHOTS_DIR || './payload-fire-images');
 const SCREENSHOT_FILENAME_REGEX = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}\.png$/i);
 
 async function get_app_server() {
@@ -234,9 +234,8 @@ async function get_app_server() {
 		const new_payload_fire_result = await PayloadFireResults.create(payload_fire_data);
 
 		// Send out notification via configured notification channel
-		if(process.env.SMTP_EMAIL_NOTIFICATIONS_ENABLED === "true") {
-			payload_fire_data.screenshot_url = `https://${process.env.HOSTNAME}/screenshots/${payload_fire_data.screenshot_id}.png`;
-			await notification.send_email_notification(payload_fire_data);
+		if(process.env.DISCORD_WEBHOOK_URL) {
+			await notification.send_discord_notification(payload_fire_data);
 		}
 	});
 
@@ -310,9 +309,10 @@ async function get_app_server() {
         const pages_to_collect = (db_results[0] === null) ? [] : JSON.parse(db_results[0].value);
         const chainload_uri = (db_results[1] === null) ? '' : db_results[1].value;
 
+        const protocol = process.env.USE_SSL === 'true' ? 'https' : 'http';
         res.send(XSS_PAYLOAD.replace(
             /\[HOST_URL\]/g,
-            `https://${process.env.HOSTNAME}`
+            `${protocol}://${process.env.HOSTNAME}`
         ).replace(
             '[COLLECT_PAGE_LIST_REPLACE_ME]',
             JSON.stringify(pages_to_collect)

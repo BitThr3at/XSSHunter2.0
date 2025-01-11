@@ -1,37 +1,79 @@
-const nodemailer = require('nodemailer');
-const mustache = require('mustache');
-const fs = require('fs');
+const database = require('./database.js');
+const constants = require('./constants.js');
+const fetch = require('node-fetch');
 
-const XSS_PAYLOAD_FIRE_EMAIL_TEMPLATE = fs.readFileSync(
-	'./templates/xss_email_template.htm',
-	'utf8'
-);
-
-async function send_email_notification(xss_payload_fire_data) {
-	const transporter = nodemailer.createTransport({
-		host: process.env.SMTP_HOST,
-		port: parseInt(process.env.SMTP_PORT),
-		secure: (process.env.SMTP_USE_TLS === "true"),
-		auth: {
-			user: process.env.SMTP_USERNAME,
-			pass: process.env.SMTP_PASSWORD,
-		},
+async function send_discord_notification(xss_payload_fire_data) {
+	// Check if Discord notifications are enabled
+	const notifications_setting = await database.Settings.findOne({
+		where: {
+			key: 'DISCORD_NOTIFICATIONS_ENABLED'
+		}
 	});
 
-	const notification_html_email_body = mustache.render(
-		XSS_PAYLOAD_FIRE_EMAIL_TEMPLATE, 
-		xss_payload_fire_data
-	);
+	// Convert string 'true'/'false' to boolean
+	const isEnabled = notifications_setting ? notifications_setting.value === 'true' : true;
 
-	const info = await transporter.sendMail({
-		from: process.env.SMTP_FROM_EMAIL,
-		to: process.env.SMTP_RECEIVER_EMAIL,
-		subject: `[XSS Hunter Express] XSS Payload Fired On ${xss_payload_fire_data.url}`,
-		text: "Only HTML reports are available, please use an email client which supports this.",
-		html: notification_html_email_body,
-	});
+	if (!isEnabled) {
+		console.log('Discord notifications are disabled, skipping notification');
+		return;
+	}
 
-	console.log("Message sent: %s", info.messageId);
+	// Check if webhook URL is configured
+	if (!process.env.DISCORD_WEBHOOK_URL) {
+		console.log('No Discord webhook URL configured, skipping notification');
+		return;
+	}
+
+	try {
+		const notification_data = {
+			embeds: [{
+				title: 'XSS Payload Fired!',
+				description: `A new XSS payload has fired on ${xss_payload_fire_data.url}`,
+				fields: [
+					{
+						name: 'URL',
+						value: xss_payload_fire_data.url
+					},
+					{
+						name: 'Referer',
+						value: xss_payload_fire_data.referer || 'None'
+					},
+					{
+						name: 'IP Address',
+						value: xss_payload_fire_data.ip_address
+					},
+					{
+						name: 'User Agent',
+						value: xss_payload_fire_data.user_agent
+					},
+					{
+						name: 'Cookies',
+						value: xss_payload_fire_data.cookies || 'None'
+					}
+				],
+				color: 0xff0000,
+				timestamp: new Date().toISOString()
+			}]
+		};
+
+		const response = await fetch(process.env.DISCORD_WEBHOOK_URL, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(notification_data),
+		});
+
+		if (!response.ok) {
+			throw new Error(`Discord API responded with status: ${response.status}`);
+		}
+
+		console.log('Discord notification sent successfully');
+	} catch (error) {
+		console.error('Failed to send Discord notification:', error);
+	}
 }
 
-module.exports.send_email_notification = send_email_notification;
+module.exports = {
+	send_discord_notification
+};

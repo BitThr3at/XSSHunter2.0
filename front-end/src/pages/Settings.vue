@@ -70,29 +70,30 @@
                         </card>
                         <card>
                             <h4 class="card-title">Miscellaneous Options</h4>
-                            <base-button type="danger" v-on:click="revoke_all_sessions">
-                                <i class="fas fa-user-times"></i> Revoke All Active Sessions
-                            </base-button>
-                            <h6 class="mt-2 text-muted">Invalidates all active login sessions. This will log you out as well.</h6>
+                            <div>
+                                <base-button 
+                                    :type="discord_notifications_enabled ? 'success' : 'danger'"
+                                    v-on:click="toggle_discord_notifications"
+                                >
+                                    <i :class="discord_notifications_enabled ? 'far fa-bell' : 'far fa-bell-slash'"></i>
+                                    Discord Notifications: {{ discord_notifications_enabled === true ? 'Enabled' : 'Disabled' }}
+                                </base-button>
+                                <h6 class="mt-2 text-muted">
+                                    {{ discord_notifications_enabled === true ? 
+                                        'XSS payload fire reports are being sent to Discord.' : 
+                                        'XSS payload fire reports are not being sent to Discord.' 
+                                    }}
+                                </h6>
+                            </div>
                             <hr />
-
-                            <div v-if="send_alert_emails">
-                                <base-button type="primary" v-on:click="set_email_reporting">
-                                    <i class="far fa-bell-slash"></i> Disable Email Reporting
+                            <div class="mt-3">
+                                <base-button type="primary" v-on:click="revoke_all_sessions">
+                                    <i class="fas fa-sign-out-alt"></i> Revoke All Active Sessions
                                 </base-button>
                                 <h6 class="mt-2 text-muted">
-                                    Disable the sending of XSS payload fire reports to the specified email address.
+                                    Revoke all active sessions, forcing all users to re-authenticate.
                                 </h6>
                             </div>
-                            <div v-if="!send_alert_emails">
-                                <base-button type="primary" v-on:click="set_email_reporting">
-                                    <i class="far fa-bell"></i> Enable Email Reporting
-                                </base-button>
-                                <h6 class="mt-2 text-muted">
-                                    Enable the sending of XSS payload fire reports to the specified email address.
-                                </h6>
-                            </div>
-                            
                         </card>
                     </div>
                 </card>
@@ -169,11 +170,26 @@ export default {
             new_page_to_collect: '',
             rate_limit: -1,
             password: '',
-            send_alert_emails: true,
+            discord_notifications_enabled: true,
         }
     },
     watch: {},
     methods: {
+        toggle_discord_notifications: async function() {
+            try {
+                const response = await api_request.set_discord_notifications(!this.discord_notifications_enabled);
+                if (response.success) {
+                    await this.pull_latest_settings();
+                    const status = this.discord_notifications_enabled ? 'enabled' : 'disabled';
+                    toastr.success(`Discord notifications have been ${status}`, 'Success');
+                } else {
+                    toastr.error('Failed to update Discord notification settings', 'Error');
+                }
+            } catch (error) {
+                console.error('Error toggling Discord notifications:', error);
+                toastr.error('Failed to update Discord notification settings', 'Error');
+            }
+        },
         update_password: async function() {
             const password = this.password;
             if(password === '') {
@@ -190,30 +206,32 @@ export default {
             toastr.success('Your correlated injection API key has been rotated.', 'Correlated Injection API Key Rotated')
         },
         pull_latest_settings: async function() {
-            const settings_keys = [
-                'chainload_uri',
-                'correlation_api_key',
-                'pages_to_collect',
-                'rate_limit',
-                'send_alert_emails'
-            ];
+            try {
+                const response = await api_request.get_settings();
+                if (response.success) {
+                    this.discord_notifications_enabled = response.result.discord_notifications_enabled === 'true';
+                    const settings_keys = [
+                        'chainload_uri',
+                        'correlation_api_key',
+                        'pages_to_collect',
+                        'rate_limit',
+                    ];
 
-            // Pull settings
-            const settings_result = await api_request.get_settings();
-            const settings = settings_result.result;
-            settings_keys.map(settings_key => {
-                this[settings_key] = settings[settings_key];
-            });
+                    // Pull settings
+                    const settings = response.result;
+                    settings_keys.map(settings_key => {
+                        this[settings_key] = settings[settings_key];
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching settings:', error);
+                toastr.error('Failed to fetch settings', 'Error');
+            }
         },
         update_chainload_uri: async function() {
             await api_request.set_chainload_uri(this.chainload_uri);
             await this.pull_latest_settings();
             toastr.success('Your chainload URI has been updated.', 'Chainload URI Updated')
-        },
-        set_email_reporting: async function() {
-            await api_request.set_email_alerts(!this.send_alert_emails);
-            await this.pull_latest_settings();
-            toastr.success('Your email reporting settings have been updated.', 'Email Reporting Updated')
         },
         revoke_all_sessions: async function() {
             await api_request.revoke_all_sessions();
