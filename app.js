@@ -91,6 +91,16 @@ async function get_app_server() {
     		},
     	}
     };
+
+    // Add OPTIONS handler for page_callback
+    app.options('/page_callback', (req, res) => {
+        res.set("Access-Control-Allow-Origin", "*");
+        res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+        res.set("Access-Control-Allow-Headers", "Content-Type, X-Requested-With");
+        res.set("Access-Control-Max-Age", "86400");
+        res.sendStatus(200);
+    });
+
     app.post('/page_callback', upload.none(), validate({body: CollectedPagesCallbackSchema}), async (req, res) => {
 		res.set("Access-Control-Allow-Origin", "*");
 		res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -165,6 +175,16 @@ async function get_app_server() {
     		}
     	}
     };
+
+    // Add OPTIONS handler for js_callback
+    app.options('/js_callback', (req, res) => {
+        res.set("Access-Control-Allow-Origin", "*");
+        res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+        res.set("Access-Control-Allow-Headers", "Content-Type, X-Requested-With");
+        res.set("Access-Control-Max-Age", "86400");
+        res.sendStatus(200);
+    });
+
     app.post('/js_callback', upload.single('screenshot'), validate({body: JSCallbackSchema}), async (req, res) => {
 		res.set("Access-Control-Allow-Origin", "*");
 		res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
