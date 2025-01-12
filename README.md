@@ -98,7 +98,7 @@ docker-compose logs -f
 1. Access the admin panel at `https://yourdomain.com/admin/`
 2. The initial password will be displayed in the docker logs
    
-## 🛡️ Additonal Security
+## 🛡️ Additional Security
 You can configure Cloudflare to proxy your XSSHunter server and protect your VPS IP address. However, there are two key adjustments you need to make in Cloudflare to ensure everything works correctly:
 1. Set ssl configuration as `full`
 ![image](https://github.com/user-attachments/assets/03260520-6c68-4e2c-9355-55b2ef464f4f)
